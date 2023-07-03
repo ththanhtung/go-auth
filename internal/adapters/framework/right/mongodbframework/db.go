@@ -1,4 +1,4 @@
-package db
+package mongodbframework
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"lab5.cmo/internal/application/core"
 )
 
 type Adapter struct {
@@ -39,7 +40,7 @@ func (db Adapter) openCollection(collectionName string) *mongo.Collection {
 	return collection
 }
 
-func (db Adapter) CreateUser(username, password, firstname, lastname, email, dob, avatar, address string) (User, error) {
+func (db Adapter) CreateUser(username, password, firstname, lastname, email, dob, avatar, address string) (core.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	userCollection := db.openCollection("user")
 
@@ -49,10 +50,10 @@ func (db Adapter) CreateUser(username, password, firstname, lastname, email, dob
 	defer cancel()
 
 	if count > 0 {
-		return User{},errors.New("user already existed")
+		return core.User{},errors.New("user already existed")
 	}
 
-	newUser := User{
+	newUser := core.User{
 		ID: primitive.NewObjectID(),
 		Username:  username,
 		Password:  password,
@@ -70,7 +71,7 @@ func (db Adapter) CreateUser(username, password, firstname, lastname, email, dob
 	defer cancel()
 
 	if err!= nil {
-		return User{}, err 
+		return core.User{}, err 
 	}
 
 	insertedID := result.InsertedID.(primitive.ObjectID)
@@ -78,17 +79,17 @@ func (db Adapter) CreateUser(username, password, firstname, lastname, email, dob
 	err = userCollection.FindOne(ctx, bson.M{"_id": insertedID}).Decode(&newUser)
 
 	if err!= nil {
-		return User{}, err 
+		return core.User{}, err 
 	}
 
 	return newUser, nil
 }
-func (db Adapter) UpdateUser(username, password string, updatecontent User) (User, error) {
+func (db Adapter) UpdateUser(username, password string, updatecontent core.User) (core.User, error) {
 	userCollection := db.openCollection("user")
 	_, err := db.Login(username, password)
 	
 	if err != nil {
-		return User{}, err
+		return core.User{}, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
@@ -109,19 +110,19 @@ func (db Adapter) UpdateUser(username, password string, updatecontent User) (Use
 		},
 	}
 
-	var updatedUser User
+	var updatedUser core.User
 	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
 	err = userCollection.FindOneAndUpdate(ctx, filter, updateProperty, options).Decode(&updatedUser)
 	defer cancel()
 
 	if err != nil {
-		return User{}, err
+		return core.User{}, err
 	}
 
 	return updatedUser, nil
 }
 
-func (db Adapter) Login(username, password string) (User, error) {
+func (db Adapter) Login(username, password string) (core.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	userCollection := db.openCollection("user")
 	countUser, err := userCollection.CountDocuments(ctx, bson.M{
@@ -129,10 +130,10 @@ func (db Adapter) Login(username, password string) (User, error) {
 	})
 	defer cancel()
 	if err != nil {
-		return User{}, err
+		return core.User{}, err
 	}
 	if countUser == 0 {
-		return User{}, errors.New("incorrect username or password, name")
+		return core.User{}, errors.New("incorrect username or password, name")
 	}
 	countPassword, err := userCollection.CountDocuments(ctx, bson.M{
 		"password": password,
@@ -140,12 +141,12 @@ func (db Adapter) Login(username, password string) (User, error) {
 	defer cancel()
 	if err != nil {
 		log.Println(err.Error())
-		return User{}, err
+		return core.User{}, err
 	}
 	if countPassword == 0 {
-		return User{}, errors.New("incorrect username or password, pass")
+		return core.User{}, errors.New("incorrect username or password, pass")
 	}
-	var user User
+	var user core.User
 	userCollection.FindOne(ctx, bson.M{
 		"username": username,
 		"password": password,
@@ -153,7 +154,7 @@ func (db Adapter) Login(username, password string) (User, error) {
 
 	return user, nil
 }
-func (db Adapter) GetUsers() ([]User, error) {
+func (db Adapter) GetUsers() ([]core.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	userCollection := db.openCollection("user")
 	cursor, err := userCollection.Find(ctx, bson.M{})
@@ -162,9 +163,9 @@ func (db Adapter) GetUsers() ([]User, error) {
 		log.Println(err.Error())
 		return nil, err
 	}
-	var users []User
+	var users []core.User
 	for cursor.Next(ctx) {
-		var user User
+		var user core.User
 		err := cursor.Decode(&user)
 		if err != nil {
 			log.Println(err.Error())
@@ -175,12 +176,12 @@ func (db Adapter) GetUsers() ([]User, error) {
 	defer cancel()
 	return users, nil
 }
-func (db Adapter) DeleteUser(username, password string) (User, error) {
+func (db Adapter) DeleteUser(username, password string) (core.User, error) {
 	userCollection := db.openCollection("user")
 	_, err := db.Login(username, password)
 	
 	if err != nil {
-		return User{}, err
+		return core.User{}, err
 	}
 	
 	filter := bson.M{
@@ -190,12 +191,12 @@ func (db Adapter) DeleteUser(username, password string) (User, error) {
 	
 	
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var deletedUser User
+	var deletedUser core.User
 	err = userCollection.FindOneAndDelete(ctx, filter).Decode(&deletedUser)
 	defer cancel()
 
 	if err != nil {
-		return User{}, err
+		return core.User{}, err
 	}
 
 	return deletedUser, nil

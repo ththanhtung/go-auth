@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"lab5.cmo/internal/adapters/framework/right/db"
+	"lab5.cmo/internal/application/core"
 )
 
 type User struct {
@@ -45,7 +45,7 @@ func (a Adapter) updateUser(c *gin.Context) {
 		Password string          `json:"password"`
 	}
 
-	var updatedUser db.User
+	var updatedUser core.User
 
 	username := c.Param("username")
 	log.Println("param:", username)

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"lab5.cmo/internal/adapters/framework/right/db"
+	"lab5.cmo/internal/application/core"
 )
 
 type User struct {
@@ -46,7 +46,7 @@ func (a Adapter) updateUser(c *fiber.Ctx) error {
 		Password string          `json:"password"`
 	}
 
-	var updatedUser db.User
+	var updatedUser core.User
 
 	username := c.Params("username")
 	log.Println("param:", username)
