@@ -1,7 +1,8 @@
 package main
 
 import (
-	"lab5.cmo/internal/adapters/framework/left/http"
+	"lab5.cmo/internal/adapters/framework/left/gingonic"
+	// "lab5.cmo/internal/adapters/framework/left/gofiber"
 	"lab5.cmo/internal/adapters/framework/right/db"
 	"lab5.cmo/internal/application/api"
 )
@@ -11,7 +12,11 @@ func main() {
 
 	api := api.NewApplication(db)
 
-	server := http.NewAdapter(api)
+	// gin framework
+	server := gingonic.NewAdapter(api)
+
+	// gofiber framework
+	// server := gofiber.NewAdapter(api)
 
 	server.Run()
 }

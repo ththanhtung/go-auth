@@ -35,7 +35,7 @@ func NewAdapter() *Adapter {
 }
 
 func (db Adapter) openCollection(collectionName string) *mongo.Collection {
-	collection := db.db.Database("cluster0").Collection(collectionName)
+	collection := db.db.Database("goauth").Collection(collectionName)
 	return collection
 }
 
