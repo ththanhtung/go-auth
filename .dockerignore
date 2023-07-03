@@ -1,0 +1,11 @@
+# Files and directories to ignore when building a Docker image
+.git
+.vscode
+*.log
+*.test
+*.tmp
+*.bak
+*.swp
+.DS_Store
+node_modules
+vendor
