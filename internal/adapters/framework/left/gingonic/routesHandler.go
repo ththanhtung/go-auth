@@ -26,7 +26,7 @@ func (a Adapter) createUser(c *gin.Context) {
 
 	c.ShouldBindJSON(&req)
 
-	log.Println(req)
+	// log.Println(req)
 
 	newUser, err := a.api.CreateUser(req.Username, req.Password, req.Firstname, req.Lastname, req.Email, req.DoB, req.Avatar, req.Address)
 	if err != nil {
